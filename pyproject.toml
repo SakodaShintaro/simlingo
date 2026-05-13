@@ -123,6 +123,8 @@ dependencies = [
     "webcolors==1.13",
 
     "flash-attn==2.7.0.post2",
+
+    "setuptools<81",
 ]
 
 [tool.uv]
