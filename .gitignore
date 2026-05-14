@@ -5,6 +5,8 @@ results/
 outputs/
 eval/
 eval_results/
+eval_res/
+eval_viz/
 pretrained/
 
 # Byte-compiled / optimized / DLL files
