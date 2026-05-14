@@ -36,8 +36,8 @@ CARLA サーバは [Bench2Drive/leaderboard/leaderboard/leaderboard_evaluator.py
 ### 1 ルート評価 (動作確認用)
 
 ```bash
-scripts/eval_1route.sh        # デフォルトは route 00
-scripts/eval_1route.sh 042    # 任意の ID (000..219)
+./scripts/eval_1route.sh       # デフォルトは route 00
+./scripts/eval_1route.sh 42    # 任意の ID (00..219)
 ```
 
 オプション環境変数: `PORT` `TM_PORT` `GPU_RANK` `SIMLINGO_CKPT`
@@ -50,7 +50,7 @@ scripts/eval_1route.sh 042    # 任意の ID (000..219)
 scripts/eval_220routes.sh
 ```
 
-- `bench2drive_split/*.xml` を順次評価 (CARLA 起動 60s × 220 routes ≈ 3.6h オーバーヘッド)
+- `bench2drive_split/*.xml` を順次評価
 - 完了済みルート (`eval_res/<ID>_res.json` 存在) は自動スキップ → 中断後の再開可
 - ルート失敗時は CARLA をクリーンアップして次へ
 - 完走後 `merge_route_json.py` を自動実行
