@@ -2,7 +2,8 @@
 # Usage: scripts/eval_220routes.sh
 #   Loops bench2drive_split/*.xml sequentially. Skips routes with existing result json.
 #   Each route call auto-starts and shuts down CARLA (60s startup overhead per route).
-#   Env override: PORT, TM_PORT, GPU_RANK, SIMLINGO_CKPT
+#   Env override: PORT, TM_PORT, GPU_RANK, SIMLINGO_CKPT, SIMLINGO_BIAS_CONFIG
+#     SIMLINGO_BIAS_CONFIG: optional path to a sensor-bias YAML (configs/bias/*.yaml)
 set -euo pipefail
 
 PORT="${PORT:-2020}"
@@ -18,7 +19,8 @@ ROUTE_FILES=("$WORK_DIR"/leaderboard/data/bench2drive_split/bench2drive_*.xml)
 TOTAL=${#ROUTE_FILES[@]}
 
 echo "Total routes: $TOTAL"
-echo "Checkpoint: $SIMLINGO_CKPT"
+echo "Checkpoint:   $SIMLINGO_CKPT"
+echo "Bias config:  ${SIMLINGO_BIAS_CONFIG:-(none)}"
 
 IDX=0
 for ROUTE_FILE in "${ROUTE_FILES[@]}"; do

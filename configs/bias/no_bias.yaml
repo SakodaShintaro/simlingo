@@ -1,0 +1,25 @@
+# Default sensor bias config — no bias applied.
+# Use this as the template; copy and edit values to inject biases.
+#
+# Activate by exporting:
+#   export SIMLINGO_BIAS_CONFIG=/path/to/this/file.yaml
+# before running the leaderboard evaluator.
+
+speed:
+  scale: 1.0         # multiplicative bias on speedometer (1.0 = no bias, 1.05 = 5% over-read)
+  offset: 0.0        # additive bias in m/s
+
+gps:
+  x: 0.0             # constant offset on GPS (CARLA local x, meters)
+  y: 0.0             # constant offset on GPS (CARLA local y, meters)
+
+compass:
+  deg: 0.0           # constant yaw offset in degrees (added to compass after preprocess)
+
+camera:              # mount-level bias for the front RGB camera(s)
+  dx: 0.0            # x offset in meters (vehicle frame; +x = forward)
+  dy: 0.0            # y offset in meters (+y = right)
+  dz: 0.0            # z offset in meters (+z = up)
+  roll_deg: 0.0      # roll offset in degrees
+  pitch_deg: 0.0     # pitch offset in degrees (+pitch = nose up)
+  yaw_deg: 0.0       # yaw offset in degrees (+yaw = clockwise from above)

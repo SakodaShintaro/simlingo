@@ -1,7 +1,8 @@
 #!/bin/bash
 # Usage: scripts/eval_1route.sh [ROUTE_ID]
 #   ROUTE_ID: 00..219 (default: 00)
-#   Env override: PORT, TM_PORT, GPU_RANK, SIMLINGO_CKPT
+#   Env override: PORT, TM_PORT, GPU_RANK, SIMLINGO_CKPT, SIMLINGO_BIAS_CONFIG
+#     SIMLINGO_BIAS_CONFIG: optional path to a sensor-bias YAML (configs/bias/*.yaml)
 set -euo pipefail
 
 ROUTE_ID="${1:-00}"
@@ -26,9 +27,10 @@ mkdir -p "$OUT_DIR" "$VIZ_DIR"
 export SAVE_PATH="$VIZ_DIR/"
 
 echo "=== Route $ROUTE_ID ==="
-echo "Checkpoint: $SIMLINGO_CKPT"
-echo "Result:     $RESULT_FILE"
-echo "Port:       $PORT (TM: $TM_PORT) GPU: $GPU_RANK"
+echo "Checkpoint:  $SIMLINGO_CKPT"
+echo "Result:      $RESULT_FILE"
+echo "Port:        $PORT (TM: $TM_PORT) GPU: $GPU_RANK"
+echo "Bias config: ${SIMLINGO_BIAS_CONFIG:-(none)}"
 
 python "$LEADERBOARD_ROOT/leaderboard/leaderboard_evaluator.py" \
     --routes="$ROUTE_FILE" \

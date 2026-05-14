@@ -1,0 +1,20 @@
+# Example: speedometer over-reads by 5% (real speed 20 m/s -> reading 21 m/s).
+
+speed:
+  scale: 1.05
+  offset: 0.0
+
+gps:
+  x: 0.0
+  y: 0.0
+
+compass:
+  deg: 0.0
+
+camera:
+  dx: 0.0
+  dy: 0.0
+  dz: 0.0
+  roll_deg: 0.0
+  pitch_deg: 0.0
+  yaw_deg: 0.0

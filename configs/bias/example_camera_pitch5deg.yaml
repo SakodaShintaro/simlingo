@@ -1,0 +1,21 @@
+# Example: camera tilted +5 degrees down (simulates mount misalignment).
+# All other sensors are unbiased.
+
+speed:
+  scale: 1.0
+  offset: 0.0
+
+gps:
+  x: 0.0
+  y: 0.0
+
+compass:
+  deg: 0.0
+
+camera:
+  dx: 0.0
+  dy: 0.0
+  dz: 0.0
+  roll_deg: 0.0
+  pitch_deg: -5.0    # nose-down by 5 degrees
+  yaw_deg: 0.0

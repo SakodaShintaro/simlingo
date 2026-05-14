@@ -62,6 +62,49 @@ DEBUG = True # saves images during evaluation
 HD_VIZ = False
 USE_UKF = True
 
+
+def _load_sensor_bias():
+    """Load sensor bias config from YAML pointed to by SIMLINGO_BIAS_CONFIG.
+
+    Returns a flat dict; all zeros (no bias) if the env var is unset.
+    """
+    bias = {
+        'speed_scale': 1.0,
+        'speed_offset': 0.0,
+        'gps_x': 0.0,
+        'gps_y': 0.0,
+        'compass_rad': 0.0,
+        'cam_dx': 0.0,
+        'cam_dy': 0.0,
+        'cam_dz': 0.0,
+        'cam_roll_deg': 0.0,
+        'cam_pitch_deg': 0.0,
+        'cam_yaw_deg': 0.0,
+    }
+
+    bias_config_path = os.environ.get('SIMLINGO_BIAS_CONFIG')
+    if not bias_config_path:
+        print('[LingoAgent] SIMLINGO_BIAS_CONFIG not set; using zero sensor bias')
+        return bias
+
+    cfg = OmegaConf.load(bias_config_path)
+    bias.update({
+        'speed_scale':   float(cfg.speed.scale),
+        'speed_offset':  float(cfg.speed.offset),
+        'gps_x':         float(cfg.gps.x),
+        'gps_y':         float(cfg.gps.y),
+        'compass_rad':   math.radians(float(cfg.compass.deg)),
+        'cam_dx':        float(cfg.camera.dx),
+        'cam_dy':        float(cfg.camera.dy),
+        'cam_dz':        float(cfg.camera.dz),
+        'cam_roll_deg':  float(cfg.camera.roll_deg),
+        'cam_pitch_deg': float(cfg.camera.pitch_deg),
+        'cam_yaw_deg':   float(cfg.camera.yaw_deg),
+    })
+    print(f'[LingoAgent] loaded sensor bias from {bias_config_path}: {bias}')
+    return bias
+
+
 class LingoAgent(autonomous_agent.AutonomousAgent):
     """
         Main class that runs the agents with the run_step function
@@ -88,6 +131,7 @@ class LingoAgent(autonomous_agent.AutonomousAgent):
         self.device = torch.device('cuda')
         self.DrivingInput = {}
         self.config = GlobalConfig()
+        self.bias = _load_sensor_bias()
 
         if self.config.eval_route_as == -1:
             self.config.eval_route_as = self.model.route_as
@@ -300,12 +344,12 @@ class LingoAgent(autonomous_agent.AutonomousAgent):
             sensors += [
                     {
                             'type': 'sensor.camera.rgb',
-                            'x': self.config.__dict__[f'camera_pos_{num_cam}'][0],
-                            'y': self.config.__dict__[f'camera_pos_{num_cam}'][1],
-                            'z': self.config.__dict__[f'camera_pos_{num_cam}'][2],
-                            'roll': self.config.__dict__[f'camera_rot_{num_cam}'][0],
-                            'pitch': self.config.__dict__[f'camera_rot_{num_cam}'][1],
-                            'yaw': self.config.__dict__[f'camera_rot_{num_cam}'][2],
+                            'x': self.config.__dict__[f'camera_pos_{num_cam}'][0] + self.bias['cam_dx'],
+                            'y': self.config.__dict__[f'camera_pos_{num_cam}'][1] + self.bias['cam_dy'],
+                            'z': self.config.__dict__[f'camera_pos_{num_cam}'][2] + self.bias['cam_dz'],
+                            'roll': self.config.__dict__[f'camera_rot_{num_cam}'][0] + self.bias['cam_roll_deg'],
+                            'pitch': self.config.__dict__[f'camera_rot_{num_cam}'][1] + self.bias['cam_pitch_deg'],
+                            'yaw': self.config.__dict__[f'camera_rot_{num_cam}'][2] + self.bias['cam_yaw_deg'],
                             'width': self.config.__dict__[f'camera_width_{num_cam}'],
                             'height': self.config.__dict__[f'camera_height_{num_cam}'],
                             'fov': self.config.__dict__[f'camera_fov_{num_cam}'],
@@ -412,14 +456,15 @@ class LingoAgent(autonomous_agent.AutonomousAgent):
             raise NotImplementedError(f"Encoder {encoder} not implemented yet")
         
         gps_pos = self._route_planner.convert_gps_to_carla(input_data['gps'][1])
-        
-        compass = t_u.preprocess_compass(input_data['imu'][1][-1])
+        gps_pos = gps_pos + np.array([self.bias['gps_x'], self.bias['gps_y'], 0.0])
+
+        compass = t_u.preprocess_compass(input_data['imu'][1][-1]) + self.bias['compass_rad']
 
         result = {
                 'rgb': rgb,
                 'compass': compass,
         }
-        speed = input_data['speed'][1]['speed']
+        speed = input_data['speed'][1]['speed'] * self.bias['speed_scale'] + self.bias['speed_offset']
 
         if USE_UKF:
             if not self.filter_initialized:
@@ -434,8 +479,8 @@ class LingoAgent(autonomous_agent.AutonomousAgent):
             result['gps'] = filtered_state[0:2]
         else:
             result['gps'] = np.array([gps_pos[0], gps_pos[1]])
-            
-        speed = round(input_data['speed'][1]['speed'], 1)
+
+        speed = round(speed, 1)
 
         waypoint_route = self._route_planner.run_step(np.append(result['gps'], gps_pos[2]))
 
