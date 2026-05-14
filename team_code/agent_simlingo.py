@@ -408,7 +408,8 @@ class LingoAgent(autonomous_agent.AutonomousAgent):
             processed_image = processed_image.view(1, self.T, num_patches, C, new_height, new_width)
             
         else:
-            raise NotImplementedError(f"Encoder {self.cfg.data_module.encoder} not implemented yet")
+            encoder = OmegaConf.select(self.cfg, "data_module.encoder", default="unknown")
+            raise NotImplementedError(f"Encoder {encoder} not implemented yet")
         
         gps_pos = self._route_planner.convert_gps_to_carla(input_data['gps'][1])
         
@@ -864,7 +865,7 @@ class LingoAgent(autonomous_agent.AutonomousAgent):
 
         del self.model
         del self.config
-        if self.cfg.data_module.encoder == 'llavanext':
+        if OmegaConf.select(self.cfg, "data_module.encoder") == 'llavanext' and hasattr(self, 'processor'):
             del self.processor
 
 
