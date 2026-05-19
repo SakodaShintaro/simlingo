@@ -14,7 +14,7 @@ dependencies = [
 
     "accelerate>=1.0,<2",
     "deepspeed==0.16.2",
-    "huggingface-hub[cli]>=0.27,<1",
+    "huggingface-hub>=0.27",
     "lightning>=2.5,<2.6",
     "lightning-utilities>=0.11",
     "peft>=0.13,<1",
@@ -22,7 +22,7 @@ dependencies = [
     "safetensors>=0.5,<1",
     "tokenizers>=0.20,<1",
     "torchmetrics==1.3.1",
-    "transformers>=4.55,<5",
+    "transformers>=5.2,<5.3",
     "timm==0.9.16",
 
     "hydra-core==1.3.2",
@@ -111,7 +111,7 @@ dependencies = [
     "pydantic==2.6.1",
     "pydot==2.0.0",
     "pynvml==11.5.0",
-    "regex==2023.12.25",
+    "regex>=2023.12.25",
     "retry==0.9.2",
     "send2trash==1.8.2",
     "setproctitle==1.3.3",

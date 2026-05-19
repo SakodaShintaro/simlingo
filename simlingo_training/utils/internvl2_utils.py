@@ -17,6 +17,23 @@ from transformers import AutoConfig
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 
+# Simlingo extends the InternVL2 tokenizer with these "additional special
+# tokens" (see agent_simlingo.py and dataloader/datamodule.py). They mark
+# slots in the prompt that get replaced at inference time by waypoint /
+# route / target-point embeddings produced by `wp_encoder`. transformers 5.x
+# dropped the `tokenizer.additional_special_tokens_ids` accessor, so the
+# minimum ID is now computed via `convert_tokens_to_ids` against this list.
+SIMLINGO_ADDITIONAL_SPECIAL_TOKENS = (
+    "<WAYPOINTS>",
+    "<WAYPOINTS_DIFF>",
+    "<ORG_WAYPOINTS_DIFF>",
+    "<ORG_WAYPOINTS>",
+    "<WAYPOINT_LAST>",
+    "<ROUTE>",
+    "<ROUTE_DIFF>",
+    "<TARGET_POINT>",
+)
+
 
 def get_num_image_tokens_per_patch(encoder_variant: str) -> int:
     # we want to know how many image tokens we use so that we can adjust the batch padding

@@ -15,7 +15,12 @@ from transformers import AutoProcessor
 # from simlingo_training.dataloader.dataset_driving import Data_Driving # is called directly by hydra.utils.instantiate, keeping here to make it easier to find
 # from simlingo_training.dataloader.dataset_dreamer import Data_Dreamer # is called directly by hydra.utils.instantiate, keeping here to make it easier to find
 from simlingo_training.utils.custom_types import DrivingExample, DrivingInput, DrivingLabel, LanguageLabel
-from simlingo_training.utils.internvl2_utils import preprocess_image_batch, get_custom_chat_template, get_num_image_tokens_per_patch
+from simlingo_training.utils.internvl2_utils import (
+    SIMLINGO_ADDITIONAL_SPECIAL_TOKENS,
+    get_custom_chat_template,
+    get_num_image_tokens_per_patch,
+    preprocess_image_batch,
+)
 from simlingo_training.utils.projection import get_camera_intrinsics, get_camera_extrinsics
 
 def encode_uint8(strings: List[str], common_length: int) -> torch.Tensor:
@@ -65,7 +70,7 @@ class DataModule(LightningDataModule):
         else:
             self.tokenizer = self.processor
         # TODO: not needed anymore?
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ['<WAYPOINTS>','<WAYPOINTS_DIFF>', '<ORG_WAYPOINTS_DIFF>', '<ORG_WAYPOINTS>', '<WAYPOINT_LAST>', '<ROUTE>', '<ROUTE_DIFF>', '<TARGET_POINT>']})
+        self.tokenizer.add_special_tokens({'additional_special_tokens': list(SIMLINGO_ADDITIONAL_SPECIAL_TOKENS)})
         self.tokenizer.padding_side = "left"
 
     def setup(self, stage=None):

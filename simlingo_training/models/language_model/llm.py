@@ -85,7 +85,11 @@ class LLM(nn.Module):
             self.model = self.model.language_model
             self.model.embed_tokens = self.model.base_model.embed_tokens
         elif 'internvl' in self.variant.lower():
-            self.model = AutoModel.from_pretrained(self.variant, trust_remote_code=True)
+            # Use vendored InternVLChatModel; see internvl2_vendored/ for why.
+            from simlingo_training.models.encoder.internvl2_vendored.modeling_internvl_chat import (
+                InternVLChatModel,
+            )
+            self.model = InternVLChatModel.from_pretrained(self.variant)
             self.model = self.model.language_model
             try:
                 self.model.embed_tokens = self.model.base_model.embed_tokens

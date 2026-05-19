@@ -1,12 +1,21 @@
 import torch
 from torch import nn
 from typing import List, Optional
-from transformers import AutoModel
+
+from simlingo_training.models.encoder.internvl2_vendored.modeling_internvl_chat import (
+    InternVLChatModel,
+)
+from simlingo_training.utils.internvl2_utils import SIMLINGO_ADDITIONAL_SPECIAL_TOKENS
+
 
 class LingoInternVLModel(nn.Module):
     def __init__(self, variant, *args, **kwargs):
         super().__init__()
-        self.model = AutoModel.from_pretrained(variant, trust_remote_code=True)
+        # Use vendored InternVLChatModel directly instead of AutoModel +
+        # trust_remote_code so we don't depend on HF-hosted modeling code that
+        # is incompatible with transformers >=5.x. Weights are still pulled
+        # from `variant` on HF Hub.
+        self.model = InternVLChatModel.from_pretrained(variant)
         try:
             self.num_embeddings = self.model.language_model.model.embed_tokens.num_embeddings
         except:
@@ -51,7 +60,13 @@ class LingoInternVLModel(nn.Module):
             input_ids = adaptor_dict['language__ids']
             
             # 2a replace placeholder
-            smallest_added_id = self.tokenizer.additional_special_tokens_ids[0]
+            # transformers 5.x removed `tokenizer.additional_special_tokens_ids`,
+            # so resolve our placeholder tokens' IDs explicitly. They are added
+            # in agent_simlingo.py / dataloader/datamodule.py and form a
+            # contiguous range above the InternVL2 builtin specials.
+            smallest_added_id = min(
+                self.tokenizer.convert_tokens_to_ids(list(SIMLINGO_ADDITIONAL_SPECIAL_TOKENS))
+            )
             special_ids = torch.tensor(list(set(input_ids[(input_ids >= smallest_added_id)].tolist())), device=input_ids.device)
             # special_ids = torch.tensor(list(set(ids[(ids > 50294)].tolist())), device=ids.device)
             special_ids = special_ids.view(-1, 1, 1)

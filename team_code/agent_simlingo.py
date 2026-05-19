@@ -36,7 +36,11 @@ import scenario_logger
 import team_code.transfuser_utils as t_u
 from scenario_logger import ScenarioLogger
 from simlingo_training.utils.custom_types import DrivingInput, LanguageLabel
-from simlingo_training.utils.internvl2_utils import build_transform, dynamic_preprocess
+from simlingo_training.utils.internvl2_utils import (
+    SIMLINGO_ADDITIONAL_SPECIAL_TOKENS,
+    build_transform,
+    dynamic_preprocess,
+)
 from team_code.config_simlingo import GlobalConfig
 from team_code.nav_planner import LateralPIDController, RoutePlanner
 from team_code.simlingo_utils import (
@@ -200,7 +204,7 @@ class LingoAgent(autonomous_agent.AutonomousAgent):
                 self.tokenizer = processor.tokenizer
         else:
                 self.tokenizer = processor
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ['<WAYPOINTS>','<WAYPOINTS_DIFF>', '<ORG_WAYPOINTS_DIFF>', '<ORG_WAYPOINTS>', '<WAYPOINT_LAST>', '<ROUTE>', '<ROUTE_DIFF>', '<TARGET_POINT>']})
+        self.tokenizer.add_special_tokens({'additional_special_tokens': list(SIMLINGO_ADDITIONAL_SPECIAL_TOKENS)})
         self.tokenizer.padding_side = "left"
         # llm_tokenizer = AutoTokenizer.from_pretrained(cfg.model.language_model.variant)
         cache_dir = f"pretrained/{(cfg.model.vision_model.variant.split('/')[1])}"
