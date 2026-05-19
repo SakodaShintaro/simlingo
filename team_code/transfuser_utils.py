@@ -329,7 +329,7 @@ class PIDController(object):
     self.window.append(error)
 
     if len(self.window) >= 2:
-      integral = np.mean(self.window)
+      integral = sum(self.window) / len(self.window)
       derivative = self.window[-1] - self.window[-2]
     else:
       integral = 0.0
