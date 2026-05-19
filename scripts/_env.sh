@@ -16,7 +16,10 @@ export PYTHONPATH="$WORK_DIR:$CARLA_ROOT/PythonAPI/carla:$WORK_DIR/Bench2Drive/l
 
 # Resolve checkpoint path. Override by exporting SIMLINGO_CKPT before calling.
 if [[ -z "${SIMLINGO_CKPT:-}" ]]; then
-    HF_PATH=$(huggingface-cli download RenzKa/simlingo 2>/dev/null)
+    # `huggingface-cli download` is deprecated in huggingface-hub >=0.34 and
+    # prints a deprecation banner to stdout that breaks naive capture; use
+    # `hf download` and take the last stdout line.
+    HF_PATH=$(hf download RenzKa/simlingo 2>/dev/null | tail -n 1)
     SIMLINGO_CKPT=$(find "$HF_PATH" -name "pytorch_model.pt" -not -path "*/blobs/*" | head -n 1)
     export SIMLINGO_CKPT
 fi
